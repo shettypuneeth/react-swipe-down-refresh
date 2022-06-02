@@ -1,0 +1,39 @@
+{
+  "name": "react-codepen-embed",
+  "keywords": [
+    "react",
+    "hooks",
+    "refresh",
+    "swipe refresh",
+    "pull refresh"
+  ],
+  "version": "0.1.0",
+  "description": "React swipe down to refresh component",
+  "main": "lib/index.js",
+  "repository": {
+    "url": "https://github.com/shettypuneeth/react-swipe-down-refresh",
+    "type": "git"
+  },
+  "author": "Puneeth Shetty <puneeth102@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest --coverage",
+    "build": "babel src --out-dir lib",
+    "prepublish": "yarn build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0",
+    "@types/node": "^17.0.38",
+    "@types/react": "^18.0.10",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "types": "./index.d.ts"
+}
