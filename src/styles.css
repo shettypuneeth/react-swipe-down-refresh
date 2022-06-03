@@ -1,6 +1,5 @@
 .sdr-spinner {
   width: 30px;
-  height: 30px;
   position: absolute;
   border-radius: 50%;
   background: #fff;
@@ -17,6 +16,19 @@
 
 .sdr-circularArrowStyle {
   width: 25px;
-  height: 25px;
   color: rgb(48, 70, 179);
+}
+
+.sdr-rotate {
+  animation: rotateInfinite 1s ease-out infinite;
+}
+
+@keyframes rotateInfinite {
+  0% {
+    transform: translate(-50%, var(--sdr-resting-offset, 50px)) rotate(0);
+  }
+
+  100% {
+    transform: translate(-50%, var(--sdr-resting-offset, 50px)) rotate(360deg);
+  }
 }
