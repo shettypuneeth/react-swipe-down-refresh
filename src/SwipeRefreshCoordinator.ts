@@ -1,4 +1,4 @@
-const styles = { rotate: "" };
+const styles = { rotate: "sdr-rotate" };
 
 type OnSwipeRefreshCallback = () => Promise<void>;
 
@@ -34,12 +34,12 @@ export class SwipeRefreshCoordinator {
   private node: HTMLElement;
   private onRefresh: OnSwipeRefreshCallback;
   private config: SwipeRefreshConfig;
-  private spinnerRef: HTMLElement;
+  private spinnerRef: HTMLElement | null;
 
   constructor(
     element: HTMLElement,
     onRefresh: OnSwipeRefreshCallback,
-    spinnerRef: HTMLElement
+    spinnerRef: HTMLElement | null
   ) {
     this.node = element;
     this.onRefresh = onRefresh;
@@ -53,14 +53,16 @@ export class SwipeRefreshCoordinator {
     rotation: number = 0
   ) {
     requestAnimationFrame(() => {
-      this.spinnerRef.style.transform = `translate(-50%, ${movementY}px) rotate(${rotation}deg)`;
-      this.spinnerRef.style.opacity = `${opacity}`;
+      if (this.spinnerRef) {
+        this.spinnerRef.style.transform = `translate(-50%, ${movementY}px) rotate(${rotation}deg)`;
+        this.spinnerRef.style.opacity = `${opacity}`;
+      }
     });
   }
 
   private reset() {
     this.config.state = "idle";
-    this.config.startY = null;
+    this.config.startY = RESTING_OFFSET;
     this.config.movementY = 0;
     this.config.opacity = 0;
     this.config.rotation = 0;
@@ -72,17 +74,16 @@ export class SwipeRefreshCoordinator {
 
     // stop the rotation
     window.setTimeout(() => {
-      this.spinnerRef.classList.remove(styles.rotate);
+      if (this.spinnerRef) {
+        this.spinnerRef.classList.remove(styles.rotate);
+      }
     }, 300);
   }
 
-  private async triggerRefresh() {
-    try {
-      await this.onRefresh?.();
-    } catch (error) {
-    } finally {
+  private triggerRefresh() {
+    this.onRefresh().finally(() => {
       this.reset();
-    }
+    });
   }
 
   public setRefreshing(value: boolean) {
@@ -120,7 +121,10 @@ export class SwipeRefreshCoordinator {
           }
 
           this.config.state = "swiping";
-          this.spinnerRef.style.display = "block";
+
+          if (this.spinnerRef) {
+            this.spinnerRef.style.display = "block";
+          }
         }
 
         const movementY = dy - THRESHOLD;
@@ -159,7 +163,9 @@ export class SwipeRefreshCoordinator {
 
         // start rotating the spinner after the it has settled at the RESTING_OFFSET
         this.config.refreshAnimationTimeout = window.setTimeout(() => {
-          this.spinnerRef.classList.add(styles.rotate);
+          if (this.spinnerRef) {
+            this.spinnerRef.classList.add(styles.rotate);
+          }
         }, 300);
 
         this.triggerRefresh();
@@ -169,7 +175,7 @@ export class SwipeRefreshCoordinator {
         this.config.opacity = 0;
       }
 
-      this.config.startY = null;
+      this.config.startY = RESTING_OFFSET;
       this.updateProgress(restingOffset, this.config.opacity);
     }
   }
@@ -226,5 +232,5 @@ export class SwipeRefreshCoordinator {
 export const getSwipeRefreshCoordinator = (
   element: HTMLElement,
   onRefresh: OnSwipeRefreshCallback,
-  spinnerRef: HTMLElement
+  spinnerRef: HTMLElement | null
 ) => new SwipeRefreshCoordinator(element, onRefresh, spinnerRef);

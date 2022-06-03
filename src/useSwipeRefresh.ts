@@ -8,12 +8,12 @@ import type { SwipeRefreshCoordinator } from "./SwipeRefreshCoordinator";
  * @param element
  */
 export const useSwipeRefresh = (
-  element: HTMLElement,
+  element: HTMLElement | null,
   onRefresh: () => Promise<any>,
   spinnerRef: React.RefObject<HTMLDivElement>,
   disabled?: boolean
 ) => {
-  const swipeRefreshCoordinator = useRef<SwipeRefreshCoordinator>(null);
+  const swipeRefreshCoordinator = useRef<SwipeRefreshCoordinator | null>(null);
 
   const initialize = (node: HTMLElement) => {
     try {

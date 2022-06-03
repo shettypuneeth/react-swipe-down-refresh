@@ -12,7 +12,7 @@ const SwipeDownSpinner = React.forwardRef(
     }
 
     return (
-      <div ref={ref} className="spinner">
+      <div ref={ref} className="sdr-spinner">
         <ArrowClockwise />
       </div>
     );

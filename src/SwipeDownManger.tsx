@@ -4,7 +4,7 @@ import { useSwipeRefresh } from "./useSwipeRefresh";
 
 export interface SwipeDownManagerProps {
   onRefresh: () => Promise<void>;
-  scrollElement: HTMLElement;
+  scrollElement: HTMLElement | null;
   disabled?: boolean;
 }
 
