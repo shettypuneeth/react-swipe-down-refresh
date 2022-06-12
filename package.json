@@ -5,6 +5,7 @@
     "hooks",
     "refresh",
     "swipe refresh",
+    "pull down",
     "pull refresh"
   ],
   "version": "0.1.0",
@@ -13,7 +14,7 @@
     "url": "https://github.com/shettypuneeth/react-swipe-down-refresh",
     "type": "git"
   },
-  "author": "Puneeth Shetty <puneeth102@gmail.com>",
+  "author": "Puneeth Shetty (https://puneethshetty.in)",
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf dist",
