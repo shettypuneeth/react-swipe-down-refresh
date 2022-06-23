@@ -15,7 +15,7 @@ export default function MaterialSpinner() {
           cy="50"
           r="20"
           fill="none"
-          strokeWidth="3"
+          strokeWidth="5"
           strokeMiterlimit="10"
         />
       </svg>

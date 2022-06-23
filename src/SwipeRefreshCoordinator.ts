@@ -10,22 +10,35 @@ interface SwipeRefreshConfig {
   startY: number;
 }
 
+export interface SwipeRefreshAttributes {
+  slingshotDistance?: number;
+  threshold?: number;
+  progressViewOffset?: number;
+  progressBackgroundColor?: string;
+  progressStrokeColor?: string;
+  overrideBrowserRefresh?: boolean;
+  onStartRefresh?: () => void;
+  onEndRefresh?: () => void;
+  getScrollTopOverride?: () => number;
+}
+
 // Minimum displacement before swipe is registered. This helps avoid taps being registered as swipes
-const THRESHOLD = 15;
+const DEFAULT_THRESHOLD = 0;
 
 // Travel distance to initiate the refresh
-const SLINGSHOT_DISTANCE = 75;
+const DEFAULT_SLINGSHOT_DISTANCE = 60;
 
 // Displacement when in idle state
 const RESTING_OFFSET = -30;
 
 // Displacement when refresh is in progress
-const REFRESHING_OFFSET = 50;
+const DEFAULT_PROGRESS_VIEW_OFFSET = 30;
 
-const ANIMATION_DURATION = 300;
+const SCALE_DOWN_ANIMATION_DURATION = 300;
 
-const getOpacity = (dy: number) => (0.6 / SLINGSHOT_DISTANCE) * dy + 0.4;
-const getRotation = (dy: number) => (360 / SLINGSHOT_DISTANCE) * dy;
+const getOpacity = (dy: number, max: number) =>
+  Math.min((0.6 / max) * dy + 0.4, 1);
+const getRotation = (dy: number, max: number) => (360 / max) * dy;
 
 const round = (value: number, precision: number = 4) =>
   parseFloat(value.toPrecision(precision));
@@ -35,59 +48,112 @@ export class SwipeRefreshCoordinator {
   private onRefresh: OnSwipeRefreshCallback;
   private config: SwipeRefreshConfig;
   private spinnerRef: HTMLElement | null;
-  private onStartRefresh: () => void;
-  private onEndRefresh: () => void;
+  private slingshotDistance: number;
+  private threshold: number;
+  private progressViewOffset: number;
+  private onStartRefresh?: () => void;
+  private onEndRefresh?: () => void;
   private getScrollTopOverride?: () => number;
 
   constructor(
     element: HTMLElement,
-    onRefresh: OnSwipeRefreshCallback,
     spinnerRef: HTMLElement | null,
-    onStartRefresh: () => void,
-    onEndRefresh: () => void,
-    getScrollTopOverride?: () => number
+    onRefresh: OnSwipeRefreshCallback,
+    attributes?: SwipeRefreshAttributes
   ) {
     this.node = element;
     this.onRefresh = onRefresh;
     this.spinnerRef = spinnerRef;
     this.config = {} as SwipeRefreshConfig;
 
+    const {
+      slingshotDistance = DEFAULT_SLINGSHOT_DISTANCE,
+      threshold = DEFAULT_THRESHOLD,
+      progressViewOffset = DEFAULT_PROGRESS_VIEW_OFFSET,
+      progressBackgroundColor,
+      progressStrokeColor,
+      onEndRefresh,
+      onStartRefresh,
+      getScrollTopOverride,
+      overrideBrowserRefresh = true,
+    } = attributes || {};
+
+    this.slingshotDistance = slingshotDistance;
+    this.threshold = threshold;
+    this.progressViewOffset = progressViewOffset;
     this.getScrollTopOverride = getScrollTopOverride;
     this.onStartRefresh = onStartRefresh;
     this.onEndRefresh = onEndRefresh;
+
+    // Disable the window pull-to-refresh behavior
+    if (overrideBrowserRefresh) {
+      document.body.style.overscrollBehaviorY = "none";
+    }
+
+    // set color schemes
+    if (progressBackgroundColor) {
+      document.body.style.setProperty(
+        "--sdr-progress-background",
+        progressBackgroundColor
+      );
+    }
+
+    if (progressStrokeColor) {
+      document.body.style.setProperty(
+        "--sdr-progress-stroke",
+        progressStrokeColor
+      );
+    }
   }
 
-  private updateProgress(
-    movementY: number,
-    opacity: number,
-    rotation: number = 0
-  ) {
-    requestAnimationFrame(() => {
+  private updateProgress({
+    movementY,
+    opacity,
+    rotation = 0,
+    scale = 1,
+    nextFrame = true,
+  }: Pick<SwipeRefreshConfig, "movementY" | "opacity" | "rotation"> & {
+    scale?: number;
+    nextFrame?: boolean;
+  }) {
+    const updater = () => {
       if (this.spinnerRef) {
-        this.spinnerRef.style.transform = `translate(-50%, ${movementY}px) rotate(${rotation}deg)`;
+        this.spinnerRef.style.transform = `translate(-50%, ${movementY}px) rotate(${rotation}deg) scale(${scale})`;
         this.spinnerRef.style.opacity = `${opacity}`;
       }
-    });
+    };
+
+    nextFrame ? requestAnimationFrame(updater) : updater();
   }
 
   private reset() {
+    // clear any pending animation timeouts
+    clearTimeout(this.config.refreshAnimationTimeout);
+
     this.config.state = "idle";
     this.config.movementY = 0;
     this.config.opacity = 0;
     this.config.rotation = 0;
 
-    // clear any pending animation timeouts
-    clearTimeout(this.config.refreshAnimationTimeout);
+    this.updateProgress({
+      movementY: RESTING_OFFSET,
+      opacity: 0,
+      rotation: 0,
+      nextFrame: false,
+    });
 
-    this.hideSpinner();
-    this.onEndRefresh();
+    this.onEndRefresh?.();
+  }
+
+  private onRefreshComplete() {
+    this.hideSpinner(() => this.reset());
   }
 
   private triggerRefresh() {
-    this.onStartRefresh();
+    this.onStartRefresh?.();
 
     this.onRefresh().finally(() => {
-      this.reset();
+      this.onRefreshComplete();
     });
   }
 
@@ -97,27 +163,21 @@ export class SwipeRefreshCoordinator {
     );
   }
 
-  public setRefreshing(value: boolean) {
-    if (!value) {
-      this.reset();
-    }
-  }
-
-  private showSpinner() {
+  private hideSpinner(callback?: () => void) {
     if (this.spinnerRef) {
-      this.spinnerRef.style.display = "flex";
-    }
-  }
+      const { movementY, rotation } = this.config;
 
-  private hideSpinner() {
-    if (this.spinnerRef) {
-      this.spinnerRef.style.transform = "scale(0)";
+      this.updateProgress({
+        movementY,
+        rotation,
+        opacity: 0,
+        scale: 0.01,
+        nextFrame: false,
+      });
 
-      setTimeout(() => {
-        if (this.spinnerRef) {
-          this.spinnerRef.style.display = "none";
-        }
-      }, ANIMATION_DURATION);
+      this.config.refreshAnimationTimeout = window.setTimeout(() => {
+        callback?.();
+      }, SCALE_DOWN_ANIMATION_DURATION);
     }
   }
 
@@ -145,60 +205,61 @@ export class SwipeRefreshCoordinator {
         const dy = y - this.config.startY;
 
         if (this.config.state === "touchstart") {
-          if (dy < THRESHOLD) {
+          if (dy < this.threshold) {
             return;
           }
 
           this.config.state = "swiping";
-
-          this.showSpinner();
         }
 
-        const movementY = dy - THRESHOLD;
+        const movementY = dy - this.threshold;
 
         // Swipe has not crossed the slingshot distance or swiping up
         // update the progress using the travel distance
-        if (movementY <= SLINGSHOT_DISTANCE) {
+        if (movementY <= this.slingshotDistance) {
           this.config.movementY = movementY;
         } else {
           // Beyond slingshot distance, add delta to give rubber band effect
-          const overshoot = movementY - SLINGSHOT_DISTANCE;
-          const dampedMovement = Math.pow(overshoot, 0.6);
-          this.config.movementY = SLINGSHOT_DISTANCE + dampedMovement;
+          const overshoot = movementY - this.slingshotDistance;
+          const dampedMovement = Math.pow(overshoot, 0.5);
+          this.config.movementY = this.slingshotDistance + dampedMovement;
         }
 
-        this.config.opacity = round(getOpacity(this.config.movementY));
-        this.config.rotation = round(getRotation(this.config.movementY));
-
-        this.updateProgress(
-          this.config.movementY,
-          this.config.opacity,
-          this.config.rotation
+        this.config.opacity = round(
+          getOpacity(this.config.movementY, this.slingshotDistance)
         );
+        this.config.rotation = round(
+          getRotation(this.config.movementY, this.slingshotDistance)
+        );
+
+        this.updateProgress({
+          movementY: this.config.movementY,
+          opacity: this.config.opacity,
+          rotation: this.config.rotation,
+        });
       }
-    } catch (error) {}
+    } catch (e: any) {
+      console.log("SwipeRefreshCoordinator.handleTouchMove", e.message);
+    }
   }
 
   private handleTouchEnd() {
     if (this.config.state === "swiping") {
-      let restingOffset = RESTING_OFFSET;
-
-      if (this.config.movementY >= SLINGSHOT_DISTANCE) {
-        restingOffset = REFRESHING_OFFSET;
+      if (this.config.movementY >= this.slingshotDistance) {
+        this.config.movementY = this.progressViewOffset;
         this.config.state = "refreshing";
+
+        this.updateProgress({
+          movementY: this.config.movementY,
+          opacity: this.config.opacity,
+          rotation: this.config.rotation,
+        });
 
         this.triggerRefresh();
       } else {
         // reset the state
-        this.config.state = "idle";
-        this.config.opacity = 0;
+        this.reset();
       }
-
-      this.updateProgress(
-        restingOffset,
-        this.config.opacity,
-        this.config.rotation
-      );
     }
   }
 
@@ -224,9 +285,7 @@ export class SwipeRefreshCoordinator {
       this.node.addEventListener(
         "touchcancel",
         this.handleTouchCancel.bind(this),
-        {
-          passive: true,
-        }
+        { passive: true }
       );
     }
   }
@@ -253,17 +312,7 @@ export class SwipeRefreshCoordinator {
 
 export const getSwipeRefreshCoordinator = (
   element: HTMLElement,
-  onRefresh: OnSwipeRefreshCallback,
   spinnerRef: HTMLElement | null,
-  onStartRefresh: () => void,
-  onEndRefresh: () => void,
-  getScrollTop?: () => number
-) =>
-  new SwipeRefreshCoordinator(
-    element,
-    onRefresh,
-    spinnerRef,
-    onStartRefresh,
-    onEndRefresh,
-    getScrollTop
-  );
+  onRefresh: OnSwipeRefreshCallback,
+  attributes?: SwipeRefreshAttributes
+) => new SwipeRefreshCoordinator(element, spinnerRef, onRefresh, attributes);

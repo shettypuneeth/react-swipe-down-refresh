@@ -20,8 +20,8 @@ export default function SwipeRefreshList(props: SwipeRefreshListProps) {
     listRef,
     spinnerRef,
     onRefresh,
-    getScrollTop,
-    disabled
+    disabled,
+    { getScrollTopOverride: getScrollTop }
   );
 
   return (

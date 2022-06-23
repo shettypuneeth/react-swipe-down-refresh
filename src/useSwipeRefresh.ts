@@ -1,23 +1,26 @@
 import { getSwipeRefreshCoordinator } from "./SwipeRefreshCoordinator";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { SwipeRefreshCoordinator } from "./SwipeRefreshCoordinator";
+import { useEffect, useRef, useState } from "react";
+import type {
+  SwipeRefreshCoordinator,
+  SwipeRefreshAttributes,
+} from "./SwipeRefreshCoordinator";
 
 /**
  * The useSwipeRefresh should be used whenever the user can refresh the contents of a
  * view via a vertical swipe gesture.
- * @param element scrollable element
- * @param onRefresh callback function to be triggered on refresh
- * @param spinnerRef spinner element
- * @param disabled disable swipe-refresh
- * @param overrideBrowserRefresh Disable the browser default pull-to-refresh behavior
+ * @param scrollElementRef
+ * @param spinnerRef
+ * @param onRefresh
+ * @param disabled
+ * @param attributes
+ * @returns
  */
 export const useSwipeRefresh = (
   scrollElementRef: React.RefObject<HTMLDivElement>,
   spinnerRef: React.RefObject<HTMLDivElement>,
   onRefresh: () => Promise<any>,
-  getScrollTop?: () => number,
   disabled?: boolean,
-  overrideBrowserRefresh: boolean = true
+  attributes: SwipeRefreshAttributes = {}
 ) => {
   const swipeRefreshCoordinator = useRef<SwipeRefreshCoordinator | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -26,27 +29,28 @@ export const useSwipeRefresh = (
     try {
       swipeRefreshCoordinator.current = getSwipeRefreshCoordinator(
         node,
-        onRefresh,
         spinnerRef.current,
-        () => setIsRefreshing(true),
-        () => setIsRefreshing(false),
-        getScrollTop
+        onRefresh,
+        {
+          ...attributes,
+          onStartRefresh: () => {
+            setIsRefreshing(true);
+            attributes.onStartRefresh?.();
+          },
+          onEndRefresh: () => {
+            setIsRefreshing(false);
+            attributes.onEndRefresh?.();
+          },
+        }
       );
 
       swipeRefreshCoordinator.current.registerSwipeListeners();
     } catch (error) {}
   };
 
-  // Disable the window pull-to-refresh behavior
-  useLayoutEffect(() => {
-    if (overrideBrowserRefresh) {
-      document.body.style.overscrollBehaviorY = "contain";
-    }
-  }, []);
-
   useEffect(() => {
     const node = scrollElementRef.current;
-    const enableSwipeRefresh = !disabled && node;
+    const enableSwipeRefresh = !disabled && node !== null;
 
     if (!enableSwipeRefresh) {
       return () => {};
@@ -59,7 +63,7 @@ export const useSwipeRefresh = (
     return () => {
       swipeRefreshCoordinator.current?.unregisterSwipeListeners();
     };
-  }, [scrollElementRef.current]);
+  }, []);
 
   return { isRefreshing };
 };
