@@ -1,5 +1,8 @@
 # react-swipe-down-refresh
 
+[![npm version](https://badge.fury.io/js/react-swipe-down-refresh.svg)](https://badge.fury.io/js/react-swipe-down-refresh)
+[![license](https://img.shields.io/github/license/shettypuneeth/react-swipe-down-refresh.svg)](https://github.com/shettypuneeth/react-swipe-down-refresh/blob/main/LICENSE)
+
 Swipe down to refresh or pull-to-refresh control for mobile web applications.
 
 The component is built using composable utilities to give fine grain control over the swipe-refresh behavior. These building blocks could be used independently to build your own swipe-refresh control.
@@ -26,6 +29,14 @@ yarn add react-swipe-down-refresh
 ## Demo
 
 ---
+
+## Try it online
+
+---
+
+> Open in a mobile web-browser or toggle the device mode on a web-browser
+
+Try the app [online here](https://g4xc0y.csb.app/).
 
 ## Usage
 

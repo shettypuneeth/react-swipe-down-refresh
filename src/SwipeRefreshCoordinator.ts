@@ -141,12 +141,13 @@ export class SwipeRefreshCoordinator {
       rotation: 0,
       nextFrame: false,
     });
-
-    this.onEndRefresh?.();
   }
 
   private onRefreshComplete() {
-    this.hideSpinner(() => this.reset());
+    this.hideSpinner(() => {
+      this.reset();
+      this.onEndRefresh?.();
+    });
   }
 
   private triggerRefresh() {

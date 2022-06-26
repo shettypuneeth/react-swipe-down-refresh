@@ -61,9 +61,7 @@ export const useSwipeRefresh = (
       return () => {};
     }
 
-    if (!swipeRefreshCoordinator.current) {
-      initialize(node);
-    }
+    initialize(node);
 
     return () => {
       swipeRefreshCoordinator.current?.unregisterSwipeListeners();

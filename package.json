@@ -9,7 +9,7 @@
     "pull refresh",
     "pull-to-refresh"
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React swipe down to refresh component",
   "repository": {
     "url": "https://github.com/shettypuneeth/react-swipe-down-refresh",
