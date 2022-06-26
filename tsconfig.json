@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "dist/",
+    "outDir": "lib/",
     "declaration": true,
     "removeComments": true,
     "noImplicitAny": true,

@@ -48,6 +48,11 @@ export const useSwipeRefresh = (
     } catch (error) {}
   };
 
+  // Update the refresh handler
+  useEffect(() => {
+    swipeRefreshCoordinator.current?.setRefreshCallback(onRefresh);
+  }, [onRefresh]);
+
   useEffect(() => {
     const node = scrollElementRef.current;
     const enableSwipeRefresh = !disabled && node !== null;
@@ -62,6 +67,13 @@ export const useSwipeRefresh = (
 
     return () => {
       swipeRefreshCoordinator.current?.unregisterSwipeListeners();
+    };
+  }, [disabled]);
+
+  // Cleanup operations on unmount
+  useEffect(() => {
+    return () => {
+      swipeRefreshCoordinator.current?.cleanup();
     };
   }, []);
 

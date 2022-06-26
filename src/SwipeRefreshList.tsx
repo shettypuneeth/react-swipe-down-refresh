@@ -2,16 +2,25 @@ import React, { useRef } from "react";
 import type { ReactNode } from "react";
 import { useSwipeRefresh } from "./useSwipeRefresh";
 import SwipeDownSpinner from "./SwipeDownSpinner";
+import type { SwipeRefreshAttributes } from "./SwipeRefreshCoordinator";
 
 interface SwipeRefreshListProps {
   children: ReactNode | ReactNode[];
   onRefresh: () => Promise<void>;
-  getScrollTop?: () => number;
   disabled?: boolean;
+  className?: string;
 }
 
-export default function SwipeRefreshList(props: SwipeRefreshListProps) {
-  const { onRefresh, children, getScrollTop, disabled } = props;
+export default function SwipeRefreshList(
+  props: SwipeRefreshListProps & SwipeRefreshAttributes
+) {
+  const {
+    onRefresh,
+    children,
+    disabled,
+    className = "",
+    ...attributes
+  } = props;
 
   const listRef = useRef<HTMLDivElement>(null);
   const spinnerRef = useRef<HTMLDivElement>(null);
@@ -21,11 +30,11 @@ export default function SwipeRefreshList(props: SwipeRefreshListProps) {
     spinnerRef,
     onRefresh,
     disabled,
-    { getScrollTopOverride: getScrollTop }
+    attributes
   );
 
   return (
-    <div className="sdr-list-container" ref={listRef}>
+    <div className={`sdr-list-container ${className}`} ref={listRef}>
       {children}
 
       <SwipeDownSpinner

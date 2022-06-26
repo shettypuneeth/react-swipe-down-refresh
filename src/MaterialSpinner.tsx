@@ -13,9 +13,9 @@ export default function MaterialSpinner() {
           className="sdr-path"
           cx="50"
           cy="50"
-          r="20"
+          r="18"
           fill="none"
-          strokeWidth="5"
+          strokeWidth="3"
           strokeMiterlimit="10"
         />
       </svg>

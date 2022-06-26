@@ -267,6 +267,15 @@ export class SwipeRefreshCoordinator {
     this.reset();
   }
 
+  public setRefreshCallback(onRefresh: () => Promise<void>) {
+    this.onRefresh = onRefresh;
+  }
+
+  public cleanup() {
+    // reset the overscroll behavior
+    document.body.style.overscrollBehaviorY = "auto";
+  }
+
   public registerSwipeListeners() {
     if (this.node) {
       this.node.addEventListener(
