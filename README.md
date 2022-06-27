@@ -82,20 +82,21 @@ export default function App() {
 
 You can customize the swipe refresh spinner look and behavior via the following the props
 
-|          Name           |                               Description                               | Required | Default |
-| :---------------------: | :---------------------------------------------------------------------: | :------: | :-----: |
-|        threshold        | Minimum gesture movement displacement before swipe action is registered |  false   |  false  |
-|      onEndRefresh       |           Callback function triggered on refresh is complete            |  false   |  false  |
-|     onStartRefresh      |              Callback function triggered on refresh start               |  false   |  false  |
-|    slingshotDistance    | The distance the refresh indicator can be pulled during a swipe gesture |  false   |  false  |
-|   progressViewOffset    |              The refresh indicator position during refresh              |  false   |  false  |
-|   progressStrokeColor   |                  Color of the refresh progress spinner                  |  false   |  false  |
-|  getScrollTopOverride   |                        Disabled pull to refresh                         |  false   |  false  |
-| overrideBrowserRefresh  |               Override browser pull to refresh behaviour                |  false   |  false  |
-| progressBackgroundColor |                Background color of the progress spinner                 |  false   |  false  |
+|          Name           |                               Description                               | Required |               Default               |
+| :---------------------: | :---------------------------------------------------------------------: | :------: | :---------------------------------: |
+|        threshold        | Minimum gesture movement displacement before swipe action is registered |  false   |                 10                  |
+|      onEndRefresh       |           Callback function triggered on refresh is complete            |  false   |                  -                  |
+|     onStartRefresh      |              Callback function triggered on refresh start               |  false   |                  -                  |
+|    slingshotDistance    | The distance the refresh indicator can be pulled during a swipe gesture |  false   |                 60                  |
+|   progressViewOffset    |              The refresh indicator position during refresh              |  false   |                 30                  |
+|   progressStrokeColor   |                  Color of the refresh progress spinner                  |  false   |               #2755c4               |
+|  getScrollTopOverride   |                        Disabled pull to refresh                         |  false   | document.scrollingElement.scrollTop |
+| overrideBrowserRefresh  |                Override browser pull to refresh behavior                |  false   |                true                 |
+| progressBackgroundColor |                Background color of the progress spinner                 |  false   |                #fff                 |
 
 ## Credits
 
 ---
 
 - [Take control of your scroll](https://developer.chrome.com/blog/overscroll-behavior/)
+- [Material loading spinner](https://codepen.io/jczimm/pen/vEBpoL)

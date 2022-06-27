@@ -23,7 +23,7 @@ export interface SwipeRefreshAttributes {
 }
 
 // Minimum displacement before swipe is registered. This helps avoid taps being registered as swipes
-const DEFAULT_THRESHOLD = 0;
+const DEFAULT_THRESHOLD = 10;
 
 // Travel distance to initiate the refresh
 const DEFAULT_SLINGSHOT_DISTANCE = 60;
