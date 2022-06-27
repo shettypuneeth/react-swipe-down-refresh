@@ -90,7 +90,7 @@ You can customize the swipe refresh spinner look and behavior via the following 
 |    slingshotDistance    | The distance the refresh indicator can be pulled during a swipe gesture |  false   |                 60                  |
 |   progressViewOffset    |              The refresh indicator position during refresh              |  false   |                 30                  |
 |   progressStrokeColor   |                  Color of the refresh progress spinner                  |  false   |               #2755c4               |
-|  getScrollTopOverride   |                        Disabled pull to refresh                         |  false   | document.scrollingElement.scrollTop |
+|  getScrollTopOverride   |              Scroll top position of the scrolling element               |  false   | document.scrollingElement.scrollTop |
 | overrideBrowserRefresh  |                Override browser pull to refresh behavior                |  false   |                true                 |
 | progressBackgroundColor |                Background color of the progress spinner                 |  false   |                #fff                 |
 
